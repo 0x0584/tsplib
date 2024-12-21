@@ -1,3 +1,5 @@
+*.tsp
+.vscode
 tsp
 bin/
 *~
