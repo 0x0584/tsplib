@@ -26,21 +26,28 @@ graph::neighbours(vertex v) const {
 }
 
 graph::graph(std::size_t V, std::size_t E, resource::pack &pack)
-    : A(resource::resolve(pack, pool_adj_lst_v)),
-      W(resource::resolve(pack, pool_weights)),
-      B(V, std::pmr::vector<bool>(V, resource::resolve(pack, pool_adj_mtx)),
-        resource::resolve(pack, pool_adj_mtx)) {
+    : A(resource::pool(pack, pool_adj_lst_v)),
+      W(resource::pool(pack, pool_weights)),
+      B(V, std::pmr::vector<bool>(V, resource::pool(pack, pool_adj_mtx)),
+        resource::pool(pack, pool_adj_mtx)) {
+  A.reserve(resource::size(pack, pool_adj_lst_v));
+  W.reserve(resource::size(pack, pool_weights));
   for (std::size_t v = 1; v <= V; ++v) {
-    A[v] = std::pmr::unordered_set<vertex>(&pack[pool_adj_lst_e]->get());
+    A[v] =
+        std::pmr::unordered_set<vertex>(resource::pool(pack, pool_adj_lst_e));
   }
 }
 
 resource::pack graph::alloc(std::size_t vertices, std::size_t edges) {
   resource::pack resources = std::make_unique<resource::pointer[]>(pool_count);
-  resources[pool_adj_lst_v] = std::make_unique<resource>(vertices * sizeof(vertex));
-  resources[pool_adj_lst_e] = std::make_unique<resource>(vertices * sizeof(vertex));
-  resources[pool_weights] = std::make_unique<resource>(edges * sizeof(vertex));
-  resources[pool_adj_mtx] = std::make_unique<resource>(edges * sizeof(vertex));
+  resources[pool_adj_lst_v] =
+      std::make_unique<resource>(vertices * sizeof(adjacency_list::node_type));
+  resources[pool_adj_lst_e] =
+      std::make_unique<resource>(vertices * sizeof(neighbours::node_type));
+  resources[pool_weights] =
+      std::make_unique<resource>(2 * edges * sizeof(weight_list::node_type));
+  resources[pool_adj_mtx] =
+      std::make_unique<resource>(vertices * vertices * sizeof(bool));
   return resources;
 }
 
