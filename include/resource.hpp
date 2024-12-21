@@ -13,12 +13,12 @@ struct resource {
         pool_(buffer.get(), size, std::pmr::null_memory_resource()) {}
 
   static std::size_t size(pointer &ptr) { return ptr->size_; }
-  static std::pmr::monotonic_buffer_resource *pool(pointer &ptr) {
-    return &ptr->pool_;
+  static std::pmr::monotonic_buffer_resource &pool(pointer &ptr) {
+    return ptr->pool_;
   }
 
   static std::size_t size(pack &pack, int idx) { return size(pack[idx]); }
-  static std::pmr::monotonic_buffer_resource *pool(pack &pack, int idx) {
+  static std::pmr::monotonic_buffer_resource &pool(pack &pack, int idx) {
     return pool(pack[idx]);
   }
 
